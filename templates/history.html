@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex align-items-center mb-3">
+  <i class="bi bi-clock-history fs-4 me-2 text-primary"></i>
+  <h1 class="h5 mb-0">Analysis History</h1>
+</div>
+
+{% if items %}
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+    {% for it in items %}
+      <div class="col">
+        <div class="card shadow-sm h-100 app-hover">
+          <div class="ratio ratio-4x3">
+            <img src="{{ url_for('uploaded_file', filename=it.filename) }}" class="card-img-top object-fit-cover" alt="img">
+          </div>
+          <div class="card-body">
+            <div class="d-flex align-items-center gap-2">
+              <span class="badge {% if it.result_label == 'FAKE' %}bg-danger{% else %}bg-success{% endif %} rounded-pill px-3 py-2">
+                {{ it.result_label }}
+              </span>
+              <span class="fw-semibold">{{ "%.2f"|format(it.confidence) }}%</span>
+            </div>
+            <div class="text-muted small mt-2"><i class="bi bi-calendar3 me-1"></i>{{ it.created_at.strftime("%Y-%m-%d %H:%M") }}</div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="text-center py-5">
+    <i class="bi bi-archive display-4 text-muted d-block mb-3"></i>
+    <p class="text-muted">No history yet. Upload your first image from the dashboard.</p>
+    <a class="btn btn-primary" href="{{ url_for('dashboard') }}"><i class="bi bi-upload me-1"></i>Go to Dashboard</a>
+  </div>
+{% endif %}
+{% endblock %}

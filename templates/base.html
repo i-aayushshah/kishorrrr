@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <title>Unmask.AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              blue: '#3c82f6',
+              indigo: '#6366f1',
+              violet: '#8b5cf6'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'Segoe UI', 'Helvetica Neue', 'Arial', 'sans-serif']
+          },
+          boxShadow: {
+            elevated: '0 24px 60px rgba(14, 22, 56, 0.35)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body class="min-h-full bg-slate-950 font-sans text-slate-100 antialiased">
+  <div class="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(60%_70%_at_15%_15%,rgba(59,130,246,0.3),transparent),radial-gradient(45%_55%_at_85%_10%,rgba(147,51,234,0.25),transparent),linear-gradient(180deg,rgba(15,23,42,0.75),rgba(2,6,23,0.9))]"></div>
+
+  {% include "_flash.html" %}
+
+  <div class="relative flex min-h-screen flex-col">
+    <header class="sticky top-0 z-50 border-b border-slate-800/60 bg-slate-950/80 backdrop-blur">
+      <div class="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-6 lg:px-10">
+        <div class="flex items-center gap-4">
+          <button type="button" class="inline-flex items-center justify-center rounded-full border border-slate-700/60 bg-slate-900/80 p-2 text-slate-300 transition hover:border-brand-blue/60 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 lg:hidden" data-mobile-nav-toggle>
+            <span class="sr-only">Toggle navigation</span>
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <a href="{{ url_for('dashboard') }}" class="group flex items-center gap-3 font-semibold tracking-tight text-white">
+            <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-blue via-brand-indigo to-brand-violet text-base font-bold transition group-hover:scale-105">U</span>
+            <span class="text-lg">Unmask<span class="text-brand-blue">.AI</span></span>
+          </a>
+        </div>
+
+        <div class="hidden items-center gap-1 text-sm font-medium text-slate-300 lg:flex">
+          <a href="{{ url_for('dashboard') }}" class="rounded-full px-3 py-1.5 transition {{ 'bg-slate-800/80 text-white' if request.endpoint=='dashboard' else 'hover:bg-slate-800/60 hover:text-white' }}">Dashboard</a>
+          {% if is_authed or is_guest %}
+          <a href="{{ url_for('history') }}" class="rounded-full px-3 py-1.5 transition {{ 'bg-slate-800/80 text-white' if request.endpoint=='history' else 'hover:bg-slate-800/60 hover:text-white' }}">History</a>
+          {% endif %}
+        </div>
+
+        <div class="flex items-center gap-2">
+          {% if is_authed %}
+            <a href="{{ url_for('signout') }}" class="hidden items-center gap-2 rounded-full border border-slate-700/60 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-brand-blue/60 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 sm:flex">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18 12H8.25" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 15l3-3-3-3" />
+              </svg>
+              Sign out
+            </a>
+          {% else %}
+            <a href="{{ url_for('signin') }}" class="hidden items-center gap-2 rounded-full border border-slate-700/60 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-brand-blue/60 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 sm:flex">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 15l3 3m0 0l3-3m-3 3V3" />
+              </svg>
+              Sign in
+            </a>
+          {% endif %}
+          <a href="{{ url_for('signup') }}" class="inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-brand-blue via-brand-indigo to-brand-violet px-5 py-2 text-sm font-semibold text-white shadow-elevated transition hover:brightness-[1.07] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Sign up free
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <div class="flex-1">
+      <div class="mx-auto flex w-full max-w-7xl flex-1 gap-8 px-6 py-10 lg:px-10">
+        <aside class="hidden w-64 shrink-0 rounded-3xl border border-slate-800/70 bg-slate-900/50 p-6 shadow-xl shadow-black/20 backdrop-blur lg:block">
+          <div class="flex flex-col gap-6">
+            <div>
+              <p class="text-xs font-medium uppercase tracking-[0.3em] text-slate-400">Navigate</p>
+              <nav class="mt-4 space-y-1.5 text-sm font-medium">
+                <a href="{{ url_for('dashboard') }}" class="flex items-center gap-3 rounded-2xl px-4 py-3 transition {{ 'bg-slate-800/80 text-white shadow-elevated' if request.endpoint=='dashboard' else 'text-slate-300 hover:bg-slate-800/60 hover:text-white' }}">
+                  <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-800/70 text-slate-300">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M4.5 10.5v9A1.5 1.5 0 006 21h12a1.5 1.5 0 001.5-1.5v-9" />
+                    </svg>
+                  </span>
+                  Dashboard
+                </a>
+                {% if is_authed or is_guest %}
+                <a href="{{ url_for('history') }}" class="flex items-center gap-3 rounded-2xl px-4 py-3 transition {{ 'bg-slate-800/80 text-white shadow-elevated' if request.endpoint=='history' else 'text-slate-300 hover:bg-slate-800/60 hover:text-white' }}">
+                  <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-800/70 text-slate-300">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l3 3" />
+                      <circle cx="12" cy="12" r="9" />
+                    </svg>
+                  </span>
+                  History
+                </a>
+                {% endif %}
+              </nav>
+            </div>
+
+            <div class="rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-900/70 via-slate-900/30 to-slate-950/80 p-5 text-sm text-slate-300">
+              <p class="font-semibold text-white">Need faster review?</p>
+              <p class="mt-2 text-slate-300/80">Upgrade to unlock batch uploads, priority processing, and collaboration.</p>
+              <a href="{{ url_for('signup') }}" class="mt-4 inline-flex items-center gap-2 rounded-full border border-slate-700/60 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-brand-blue/60 hover:text-white">
+                Explore plans
+                <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 5l7 7-7 7" />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </aside>
+
+        <main class="flex-1">
+          <div class="min-h-full rounded-3xl border border-slate-800/70 bg-slate-900/40 p-6 shadow-xl shadow-black/20 backdrop-blur-sm sm:p-8">
+            {% block content %}{% endblock %}
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <footer class="border-t border-slate-800/60 bg-slate-950/90">
+      <div class="mx-auto flex w-full max-w-7xl flex-col gap-4 px-6 py-6 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between lg:px-10">
+        <p>&copy; <span id="year"></span> Unmask.AI. All rights reserved.</p>
+        <div class="flex flex-wrap items-center gap-3">
+          <a href="{{ url_for('signup') }}" class="inline-flex items-center gap-2 rounded-full border border-slate-700/60 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-brand-blue/60 hover:text-white">
+            Join the waitlist
+            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L21 3m0 0v5.25M21 3h-5.25" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l1.5 10.5A1.5 1.5 0 005.985 21h12.03a1.5 1.5 0 001.485-1.5L21 9M3 9l4.5-6h9L21 9M3 9h18" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <div class="fixed inset-y-0 right-0 z-50 hidden w-full max-w-xs border-l border-slate-800/60 bg-slate-950/95 px-6 py-6 shadow-2xl shadow-black/40 backdrop-blur" data-mobile-nav>
+    <div class="flex h-full flex-col">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-blue via-brand-indigo to-brand-violet text-base font-bold">U</span>
+          <div>
+            <p class="text-sm font-semibold text-white">Unmask.AI</p>
+            <p class="text-xs text-slate-400">Deepfake intelligence</p>
+          </div>
+        </div>
+        <button type="button" class="rounded-full border border-slate-700/60 bg-slate-900/80 p-2 text-slate-300 transition hover:border-brand-blue/60 hover:text-white" data-mobile-nav-close>
+          <span class="sr-only">Close navigation</span>
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <nav class="mt-8 space-y-2 text-sm font-medium text-slate-300">
+        <a href="{{ url_for('dashboard') }}" class="flex items-center justify-between rounded-2xl border border-transparent px-4 py-3 transition {{ 'border-brand-blue/50 bg-brand-blue/10 text-white' if request.endpoint=='dashboard' else 'hover:border-slate-700/60 hover:bg-slate-900/70 hover:text-white' }}" data-mobile-nav-link>
+          <span>Dashboard</span>
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </a>
+        {% if is_authed or is_guest %}
+        <a href="{{ url_for('history') }}" class="flex items-center justify-between rounded-2xl border border-transparent px-4 py-3 transition {{ 'border-brand-blue/50 bg-brand-blue/10 text-white' if request.endpoint=='history' else 'hover:border-slate-700/60 hover:bg-slate-900/70 hover:text-white' }}" data-mobile-nav-link>
+          <span>History</span>
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l3 3" />
+            <circle cx="12" cy="12" r="9" />
+          </svg>
+        </a>
+        {% endif %}
+      </nav>
+
+      <div class="mt-auto space-y-3 text-sm text-slate-300">
+        {% if is_authed %}
+          <a href="{{ url_for('signout') }}" class="flex items-center justify-center gap-2 rounded-full border border-slate-700/60 px-4 py-2 font-semibold uppercase tracking-wide transition hover:border-brand-blue/60 hover:text-white">
+            Sign out
+          </a>
+        {% else %}
+          <a href="{{ url_for('signin') }}" class="flex items-center justify-center gap-2 rounded-full border border-slate-700/60 px-4 py-2 font-semibold uppercase tracking-wide transition hover:border-brand-blue/60 hover:text-white">
+            Sign in
+          </a>
+        {% endif %}
+        <a href="{{ url_for('signup') }}" class="flex items-center justify-center gap-2 rounded-full bg-gradient-to-br from-brand-blue via-brand-indigo to-brand-violet px-4 py-2 font-semibold uppercase tracking-wide text-white transition hover:brightness-[1.07]">
+          Sign up free
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

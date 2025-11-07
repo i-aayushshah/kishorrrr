@@ -1,0 +1,40 @@
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="pointer-events-none fixed top-5 right-6 z-50 flex w-full max-w-sm flex-col gap-3">
+      {% for category, message in messages %}
+        {% set base_classes = 'pointer-events-auto rounded-2xl border px-5 py-4 text-sm shadow-xl backdrop-blur-sm transition' %}
+        {% if category in ['success', 'ok'] %}
+          {% set color_classes = 'border-emerald-500/40 bg-emerald-500/10 text-emerald-100' %}
+          {% set icon_path = 'M4.5 12.75l6 6 9-13.5' %}
+        {% elif category in ['danger', 'error'] %}
+          {% set color_classes = 'border-rose-500/40 bg-rose-500/10 text-rose-100' %}
+          {% set icon_path = 'M12 9v4m0 4h.01M12 7.5a.75.75 0 110-1.5.75.75 0 010 1.5z' %}
+        {% elif category in ['warning', 'alert'] %}
+          {% set color_classes = 'border-amber-500/40 bg-amber-500/10 text-amber-100' %}
+          {% set icon_path = 'M12 9v3.75m0 3.75h.01M10.29 3.86l-7.5 13A1.5 1.5 0 004.08 19.5h15.84a1.5 1.5 0 001.29-2.64l-7.5-13a1.5 1.5 0 00-2.58 0z' %}
+        {% else %}
+          {% set color_classes = 'border-slate-700/60 bg-slate-900/80 text-slate-100' %}
+          {% set icon_path = 'M12 9v3.75m0 3.75h.01M4.5 12A7.5 7.5 0 1112 19.5 7.5 7.5 0 014.5 12z' %}
+        {% endif %}
+        <div class="{{ base_classes }} {{ color_classes }}" data-flash>
+          <div class="flex items-start gap-3">
+            <span class="mt-1 inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/10">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="{{ icon_path }}" />
+              </svg>
+            </span>
+            <div class="flex-1 text-sm leading-6">
+              <p class="font-medium">{{ message }}</p>
+            </div>
+            <button type="button" class="inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/80 transition hover:bg-white/10" data-dismiss-flash>
+              <span class="sr-only">Dismiss</span>
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}

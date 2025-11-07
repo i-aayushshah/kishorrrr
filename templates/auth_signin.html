@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="relative overflow-hidden rounded-3xl border border-slate-800/70 bg-slate-900/60 px-6 py-14 shadow-2xl shadow-black/30 backdrop-blur-sm sm:px-10">
+  <div class="absolute inset-x-0 -top-40 h-80 bg-gradient-to-b from-brand-blue/20 via-transparent to-transparent blur-3xl"></div>
+  <div class="relative z-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:items-center">
+    <div class="space-y-6">
+      <span class="inline-flex items-center gap-2 rounded-full border border-slate-700/60 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-slate-300">
+        Welcome back, investigator
+      </span>
+      <h1 class="text-3xl font-semibold tracking-tight text-white sm:text-4xl">Sign in to continue exposing deepfakes.</h1>
+      <p class="text-base text-slate-300">
+        Rejoin your secure workspace, pick up where you left off, and keep collaborating with your team in real time.
+      </p>
+      <div class="flex flex-wrap items-center gap-3 text-sm font-semibold text-slate-200">
+        <button type="button" class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-brand-blue via-brand-indigo to-brand-violet px-6 py-2 shadow-lg shadow-brand-blue/30 transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950" data-dialog-open="signin-modal">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M18 12H8.25" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 15l3-3-3-3" />
+          </svg>
+          Access your workspace
+        </button>
+        <a href="{{ url_for('signup') }}" class="inline-flex items-center gap-2 rounded-full border border-slate-700/60 px-5 py-2 text-slate-200 transition hover:border-brand-blue/50 hover:text-white">
+          Need a new account?
+        </a>
+      </div>
+      <div class="flex flex-wrap gap-4 text-xs text-slate-400">
+        <a href="{{ url_for('forgot_password') }}" class="inline-flex items-center gap-2 rounded-full border border-slate-700/50 px-3 py-1.5 uppercase tracking-wide text-slate-300 transition hover:border-brand-blue/50 hover:text-white">
+          Forgot password
+          <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </a>
+        <a href="{{ url_for('verify_account') }}" class="inline-flex items-center gap-2 rounded-full border border-slate-700/50 px-3 py-1.5 uppercase tracking-wide text-slate-300 transition hover:border-brand-blue/50 hover:text-white">
+          Enter verification code
+          <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="space-y-6 rounded-3xl border border-slate-800/60 bg-slate-950/70 p-8 text-sm text-slate-200 shadow-xl shadow-black/30">
+      <p class="text-lg font-semibold text-white">Stay secure</p>
+      <ul class="space-y-4 text-sm text-slate-300">
+        <li class="flex gap-3">
+          <span class="mt-0.5 inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-brand-blue/40 text-brand-blue">MFA</span>
+          <span>Multi-factor options keep your workspace locked down.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="mt-0.5 inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-brand-blue/40 text-brand-blue">SAML</span>
+          <span>Enterprise SSO ready for your identity provider.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="mt-0.5 inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-brand-blue/40 text-brand-blue">SOC2</span>
+          <span>Audited infrastructure aligned with industry compliance.</span>
+        </li>
+      </ul>
+      <div class="text-xs text-slate-500">
+        Problems signing in? <a href="mailto:support@unmask.ai" class="text-brand-blue hover:underline">Reach support</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-950/80 px-4 py-8 backdrop-blur-sm" data-dialog="signin-modal" role="dialog" aria-modal="true" aria-labelledby="signin-modal-title">
+  <div class="relative mx-auto my-10 w-full max-w-xl overflow-hidden rounded-3xl border border-slate-800/70 bg-slate-900/90 shadow-2xl shadow-black/40">
+    <div class="absolute right-4 top-4">
+      <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition hover:bg-white/10" data-dialog-close="signin-modal">
+        <span class="sr-only">Close dialog</span>
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <div class="max-h-[calc(100vh-6rem)] overflow-y-auto">
+      <div class="grid gap-8 p-8 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] sm:p-12">
+      <div class="space-y-4">
+        <h2 id="signin-modal-title" class="text-2xl font-semibold text-white">Welcome back</h2>
+        <p class="text-sm text-slate-400">Authenticate to resume tracking authenticity verdicts and team insights.</p>
+        <div class="rounded-2xl border border-slate-800/60 bg-slate-950/80 px-5 py-4 text-xs text-slate-300">
+          <p class="font-semibold text-white">Security tip</p>
+          <p class="mt-2">Use a passphrase unique to Unmask.AI and enable multi-factor authentication on next sign-in.</p>
+        </div>
+      </div>
+      <form method="post" class="space-y-5" novalidate>
+        {{ form.hidden_tag() }}
+        <label class="space-y-2 text-sm">
+          <span class="font-semibold text-slate-200">{{ form.email.label }}</span>
+          {{ form.email(class="w-full rounded-2xl border border-slate-700/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 shadow-inner shadow-black/10 focus:border-brand-blue/60 focus:outline-none", placeholder="name@example.com", autocomplete="username") }}
+        </label>
+        <label class="space-y-2 text-sm">
+          <span class="font-semibold text-slate-200">{{ form.password.label }}</span>
+          <div class="relative">
+            {{ form.password(class="w-full rounded-2xl border border-slate-700/70 bg-slate-950/60 px-4 py-3 pr-11 text-sm text-slate-100 shadow-inner shadow-black/10 focus:border-brand-blue/60 focus:outline-none", id="signinPassword", placeholder="Enter password", autocomplete="current-password") }}
+            <button type="button" class="absolute inset-y-0 right-3 flex items-center text-slate-300 transition hover:text-white" data-password-toggle="#signinPassword">
+              <span class="sr-only">Toggle password visibility</span>
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true" data-icon-visible>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <svg class="h-4 w-4 hidden" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true" data-icon-hidden>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.32 16.49 7.258 19.5 12 19.5c1.559 0 3.044-.317 4.394-.893" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21.065 12.003A10.45 10.45 0 0017.38 7.63M9.53 9.53a3 3 0 104.243 4.243" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18" />
+              </svg>
+            </button>
+          </div>
+          <span class="block text-xs text-slate-500">Forgot it? <a href="{{ url_for('forgot_password') }}" class="text-brand-blue hover:underline">Reset password</a></span>
+        </label>
+        <button type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-blue via-brand-indigo to-brand-violet px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-blue/30 transition hover:brightness-[1.07] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950">
+          {{ form.submit.label.text }}
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </button>
+        <p class="text-xs text-slate-500">New investigator? <a href="{{ url_for('signup') }}" class="text-brand-blue hover:underline">Create an account</a>.</p>
+      </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="relative mx-auto max-w-2xl overflow-hidden rounded-3xl border border-slate-800/70 bg-slate-900/60 px-6 py-12 shadow-2xl shadow-black/30 backdrop-blur-sm sm:px-12">
+  <div class="absolute inset-0 bg-gradient-to-br from-brand-indigo/10 via-transparent to-brand-blue/10 blur-3xl"></div>
+  <div class="relative z-10 space-y-8">
+    <div class="space-y-4 text-center">
+      <span class="inline-flex items-center gap-2 rounded-full border border-brand-blue/30 bg-brand-blue/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-brand-blue">Verify identity</span>
+      <h1 class="text-3xl font-semibold tracking-tight text-white">Enter your verification code</h1>
+      <p class="text-sm text-slate-300">We sent a six-digit security code to your email. Type it below to activate your Unmask.AI workspace.</p>
+    </div>
+
+    <form method="post" class="space-y-6" novalidate>
+      {{ form.hidden_tag() }}
+      <label class="block space-y-2 text-center text-sm">
+        <span class="font-semibold text-slate-200">{{ form.code.label }}</span>
+        {{ form.code(class="mx-auto block w-48 rounded-2xl border border-slate-700/70 bg-slate-950/60 px-4 py-3 text-center text-xl tracking-[0.6em] text-slate-100 shadow-inner shadow-black/10 focus:border-brand-blue/60 focus:outline-none", inputmode="numeric", pattern="[0-9]*", placeholder="••••••", autocomplete="one-time-code") }}
+      </label>
+      <button type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-blue via-brand-indigo to-brand-violet px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-blue/30 transition hover:brightness-[1.08] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950">
+        {{ form.submit.label.text }}
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7" />
+        </svg>
+      </button>
+    </form>
+
+    <div class="space-y-4 rounded-3xl border border-slate-800/70 bg-slate-950/70 p-6 text-sm text-slate-300">
+      <p class="font-semibold text-white">Didn&#39;t get the code?</p>
+      <ul class="space-y-3 text-xs text-slate-400">
+        <li class="flex gap-3">
+          <span class="inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-slate-700/60 text-slate-200">•</span>
+          <span>Check spam or promotions folders for “Unmask.AI verification”.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-slate-700/60 text-slate-200">•</span>
+          <span>Request a new code from the email we just sent.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-slate-700/60 text-slate-200">•</span>
+          <span>Still no luck? <a href="mailto:support@unmask.ai" class="text-brand-blue hover:underline">Contact support</a>.</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="flex flex-wrap justify-center gap-4 text-xs text-slate-400">
+      <a href="{{ url_for('signin') }}" class="inline-flex items-center gap-2 rounded-full border border-slate-700/50 px-4 py-2 uppercase tracking-wide text-slate-300 transition hover:border-brand-blue/50 hover:text-white">
+        Back to sign in
+      </a>
+      <a href="{{ url_for('forgot_password') }}" class="inline-flex items-center gap-2 rounded-full border border-slate-700/50 px-4 py-2 uppercase tracking-wide text-slate-300 transition hover:border-brand-blue/50 hover:text-white">
+        Forgot password
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}
+

@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="space-y-10">
+  <section class="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-brand-blue/90 via-brand-indigo/80 to-brand-violet/90 px-6 py-10 text-white shadow-elevated sm:px-10">
+    <div class="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-white/10 blur-3xl"></div>
+    <div class="absolute -bottom-32 left-10 h-72 w-72 rounded-full bg-white/5 blur-3xl"></div>
+    <div class="relative z-10 flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
+      <div class="max-w-xl space-y-6">
+        <span class="inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white/90">
+          Real-time deepfake intelligence
+        </span>
+        <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
+          Expose synthetic content in seconds.
+        </h1>
+        <p class="text-base text-white/80">
+          Unmask.AI blends forensic vision models with explainable metrics so you can trust every result. Upload an image and receive a verdict with confidence scoring you can act on instantly.
+        </p>
+        <div class="flex flex-wrap items-center gap-3 text-sm font-semibold">
+          <a href="{{ url_for('signup') }}" class="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-slate-900 shadow-lg shadow-black/20 transition hover:bg-slate-100">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Create account
+          </a>
+          {% if not is_authed %}
+            <a href="{{ url_for('guest') }}" class="inline-flex items-center gap-2 rounded-full border border-white/40 px-5 py-2 text-white transition hover:border-white/60 hover:bg-white/10">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9 9-5-5" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l5 5L21 4.5" />
+              </svg>
+              Try as guest
+            </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="grid w-full gap-4 sm:grid-cols-3 lg:w-auto lg:grid-cols-1">
+        <div class="rounded-2xl border border-white/20 bg-white/10 p-5 shadow-lg backdrop-blur">
+          <p class="text-xs uppercase tracking-wide text-white/70">Average verdict time</p>
+          <p class="mt-3 text-3xl font-semibold">1.7s</p>
+          <p class="mt-1 text-xs text-white/70">Measured over 10k public images this week.</p>
+        </div>
+        <div class="rounded-2xl border border-white/20 bg-white/10 p-5 shadow-lg backdrop-blur">
+          <p class="text-xs uppercase tracking-wide text-white/70">Detection accuracy</p>
+          <p class="mt-3 text-3xl font-semibold">98.4%</p>
+          <p class="mt-1 text-xs text-white/70">Cross-validated on the FaceForensics benchmark.</p>
+        </div>
+        <div class="rounded-2xl border border-white/20 bg-white/10 p-5 shadow-lg backdrop-blur">
+          <p class="text-xs uppercase tracking-wide text-white/70">Investigations this month</p>
+          <p class="mt-3 text-3xl font-semibold">24.6k</p>
+          <p class="mt-1 text-xs text-white/70">Trusted by analysts, journalists, and creators.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+    <div class="rounded-3xl border border-slate-800/60 bg-slate-900/80 p-6 shadow-2xl shadow-black/40 backdrop-blur-sm sm:p-8">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Upload</p>
+          <h2 class="mt-2 text-2xl font-semibold text-white sm:text-3xl">Upload &amp; analyze instantly</h2>
+        </div>
+        <span class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-blue via-brand-indigo to-brand-violet text-white">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5V19a2 2 0 002 2h14a2 2 0 002-2v-2.5" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 11.25L12 6.75l4.5 4.5" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75v9.75" />
+          </svg>
+        </span>
+      </div>
+
+      <p class="mt-4 text-sm text-slate-300">
+        Drop a file or browse your library. We currently support JPG, JPEG, and PNG formats up to 10MB.
+      </p>
+
+      <form method="post" enctype="multipart/form-data" id="analyzeForm" class="mt-6 space-y-6" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="space-y-4">
+          <div>
+            <label for="uploadInput" class="text-sm font-semibold text-slate-200">
+              {{ form.image.label.text if form.image.label.text else 'Image' }}
+            </label>
+          </div>
+
+          <label for="uploadInput" class="group relative flex cursor-pointer flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-slate-700/80 bg-slate-900/80 p-10 text-center transition hover:border-brand-blue/60 hover:bg-slate-900/60">
+            <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-800/80 text-brand-blue">
+              <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V8.25m0 0L9 11.25m3-3 3 3M6.75 19.5h10.5A1.5 1.5 0 0018.75 18V9.75A1.5 1.5 0 0017.25 8.25h-1.086a1.5 1.5 0 01-1.06-.44l-1.708-1.708a1.5 1.5 0 00-1.06-.439h-2.232a1.5 1.5 0 00-1.06.439L7.896 8.31a1.5 1.5 0 01-1.06.44H5.25A1.5 1.5 0 003.75 10.25V18a1.5 1.5 0 001.5 1.5z" />
+              </svg>
+            </div>
+            <div class="space-y-1">
+              <p class="text-base font-semibold text-white">Click to browse or drag an image here</p>
+              <p class="text-xs text-slate-400">PNG, JPG, JPEG up to 10MB</p>
+            </div>
+            <div class="absolute inset-0 rounded-3xl border border-brand-blue/40 opacity-0 transition group-hover:opacity-100"></div>
+          </label>
+          {{ form.image(class="hidden", id="uploadInput", accept="image/png,image/jpeg,image/jpg", **{'data-upload-input': 'true'}) }}
+
+          <div class="hidden" data-preview>
+            <div class="rounded-3xl border border-slate-800/60 bg-slate-900/60 p-4">
+              <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Preview</p>
+              <div class="mt-3 overflow-hidden rounded-2xl border border-slate-800/50 bg-slate-950/60">
+                <img src="" alt="Preview" class="max-h-72 w-full object-cover" data-preview-img>
+              </div>
+              <p class="mt-3 text-xs text-slate-400" data-preview-name></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <p class="text-xs text-slate-400">Uploads are processed securely and deleted after analysis.</p>
+          <button id="analyzeBtn" type="submit" class="inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-brand-blue via-brand-indigo to-brand-violet px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-blue/20 transition hover:brightness-[1.08] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950">
+            <span data-label class="inline-flex items-center gap-2">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5h2.25L7.5 18l3-10.5L13.5 15l2.25-7.5H21" />
+              </svg>
+              Analyze image
+            </span>
+            <span data-spinner class="hidden">
+              <span class="flex h-5 w-5 items-center justify-center">
+                <span class="h-5 w-5 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+              </span>
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="rounded-3xl border border-slate-800/60 bg-slate-900/60 p-6 shadow-2xl shadow-black/40 backdrop-blur-sm sm:p-8">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Insights</p>
+          <h2 class="mt-2 text-2xl font-semibold text-white sm:text-3xl">Latest verdict</h2>
+        </div>
+        <span class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-800/70 text-brand-blue">
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 3.75L9 8.25H4.5l3.75 4.5-1.5 6L12 15.75l5.25 3L15.75 12.75 19.5 8.25H15l-2.25-4.5h-1.5z" />
+          </svg>
+        </span>
+      </div>
+
+      {% if result %}
+        <div class="mt-6 space-y-6">
+          <div class="overflow-hidden rounded-3xl border border-slate-800/60 bg-slate-950/50">
+            <img src="{{ url_for('uploaded_file', filename=result.filename) }}" alt="Uploaded image" class="max-h-80 w-full object-cover">
+          </div>
+          <div class="space-y-4">
+            <div class="flex flex-wrap items-center gap-4">
+              {% if result.label == 'FAKE' %}
+                <span class="inline-flex items-center gap-2 rounded-full bg-rose-500/10 px-4 py-2 text-sm font-semibold text-rose-200">
+                  <span class="h-2 w-2 rounded-full bg-rose-400"></span>
+                  Fake detected
+                </span>
+              {% else %}
+                <span class="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-200">
+                  <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+                  Authentic
+                </span>
+              {% endif %}
+              <span class="rounded-full border border-slate-800/60 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-300">
+                Confidence score
+              </span>
+            </div>
+
+            <div class="space-y-2">
+              <div class="flex items-center justify-between text-sm text-slate-300">
+                <span>{{ result.label }}</span>
+                <span>{{ result.confidence }}%</span>
+              </div>
+              <div class="h-2 w-full overflow-hidden rounded-full bg-slate-800/60">
+                <div class="h-full rounded-full {{ 'bg-rose-500' if result.label == 'FAKE' else 'bg-emerald-400' }}" style="width: {{ result.confidence }}%;"></div>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3 text-xs text-slate-400">
+              <span class="inline-flex items-center gap-2">
+                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 6.75h15m-15 4.5h15m-15 4.5h15" />
+                </svg>
+                {{ result.filename }}
+              </span>
+              <a href="{{ url_for('history') }}" class="inline-flex items-center gap-2 rounded-full border border-slate-700/60 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-brand-blue/60 hover:text-white">
+                View history
+                <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <div class="mt-6 flex flex-col items-center justify-center gap-5 rounded-3xl border border-dashed border-slate-800/70 bg-slate-900/50 p-10 text-center">
+          <span class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-800/60 text-brand-blue">
+            <svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l3 3" />
+              <circle cx="12" cy="12" r="8.25" />
+            </svg>
+          </span>
+          <div class="space-y-2">
+            <h3 class="text-xl font-semibold text-white">Awaiting your first analysis</h3>
+            <p class="text-sm text-slate-300">Upload a candidate image to unlock result insights, authenticity scoring, and explainability overlays.</p>
+          </div>
+          <a href="#analyzeForm" class="inline-flex items-center gap-2 rounded-full border border-brand-blue/40 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-brand-blue transition hover:bg-brand-blue/10">
+            Go to uploader
+            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}
