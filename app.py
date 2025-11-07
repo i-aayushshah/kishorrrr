@@ -528,6 +528,14 @@ def create_app():
     def uploaded_file(filename):
         return send_from_directory(Config.UPLOAD_FOLDER, filename, as_attachment=False)
 
+    @app.route("/explore-plans")
+    def explore_plans():
+        return render_template("explore_plans.html")
+
+    @app.route("/join-waitlist")
+    def join_waitlist():
+        return render_template("join_waitlist.html")
+
     @app.context_processor
     def inject_user_flags():
         is_authed = current_user.is_authenticated and not getattr(current_user, "is_guest", False)
