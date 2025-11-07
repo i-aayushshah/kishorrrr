@@ -216,52 +216,89 @@ def create_app():
     def verify_account():
         form = VerificationForm()
         email = session.get('pending_verification_email')
+        pending_email_change = session.get('pending_email_change')
 
-        if not email:
+        # Check if this is an email change verification
+        if pending_email_change:
+            # This is an email change - look up user by user_id, not email
+            user = User.query.get(pending_email_change['user_id'])
+            if not user:
+                flash("Invalid verification request.", "danger")
+                session.pop('pending_email_change', None)
+                session.pop('pending_verification_email', None)
+                return redirect(url_for("signup"))
+            email = pending_email_change['new_email']  # Display new email in template
+        elif not email:
             # If no pending verification, check if user is logged in but not verified
             if current_user.is_authenticated and not getattr(current_user, "is_guest", False):
                 if not current_user.email_verified:
                     email = current_user.email
+                    user = current_user
                 else:
                     flash("Your email is already verified.", "info")
                     return redirect(url_for("dashboard"))
             else:
                 flash("Please sign up or sign in first.", "warning")
                 return redirect(url_for("signup"))
-
-        user = User.query.filter_by(email=email).first()
-        if not user:
-            flash("Invalid verification request.", "danger")
-            session.pop('pending_verification_email', None)
-            return redirect(url_for("signup"))
+        else:
+            # Regular verification - look up by email
+            user = User.query.filter_by(email=email).first()
+            if not user:
+                flash("Invalid verification request.", "danger")
+                session.pop('pending_verification_email', None)
+                return redirect(url_for("signup"))
 
         if form.validate_on_submit():
             code = form.code.data.strip()
 
             if not user.is_verification_code_valid(code):
                 flash("Invalid or expired verification code. Please check your email or request a new code.", "danger")
-                return render_template("verification.html", form=form, email=email)
+                is_authed = current_user.is_authenticated and not getattr(current_user, "is_guest", False)
+                return render_template("verification.html", form=form, email=email, is_authed=is_authed)
 
-            # Verify email
-            user.email_verified = True
-            user.verification_code = None
-            user.verification_code_expires = None
-            db.session.commit()
-
-            session.pop('pending_verification_email', None)
-
-            # Auto-login if not already logged in
-            if not current_user.is_authenticated or getattr(current_user, "is_guest", False):
-                login_user(user)
-                flash("Email verified successfully! You can now sign in.", "success")
-                return redirect(url_for("dashboard"))
-            else:
-                # User is already signed in, just verify the email
-                flash("Email verified successfully!", "success")
-                # Redirect based on where they came from
-                if request.referrer and 'user-details' in request.referrer:
+            # If this is an email change, update the email in database
+            if pending_email_change and pending_email_change['user_id'] == user.id:
+                # Check if new email is already taken by another user
+                existing_user = User.query.filter_by(email=pending_email_change['new_email']).first()
+                if existing_user and existing_user.id != user.id:
+                    flash("This email is already registered to another account.", "danger")
+                    session.pop('pending_email_change', None)
+                    session.pop('pending_verification_email', None)
                     return redirect(url_for("user_details"))
-                return redirect(url_for("dashboard"))
+
+                # Update email in database
+                user.email = pending_email_change['new_email']
+                user.email_verified = True
+                user.verification_code = None
+                user.verification_code_expires = None
+                db.session.commit()
+
+                session.pop('pending_email_change', None)
+                session.pop('pending_verification_email', None)
+
+                flash("Email changed and verified successfully!", "success")
+                return redirect(url_for("user_details"))
+            else:
+                # Regular email verification
+                user.email_verified = True
+                user.verification_code = None
+                user.verification_code_expires = None
+                db.session.commit()
+
+                session.pop('pending_verification_email', None)
+
+                # Auto-login if not already logged in
+                if not current_user.is_authenticated or getattr(current_user, "is_guest", False):
+                    login_user(user)
+                    flash("Email verified successfully! You can now sign in.", "success")
+                    return redirect(url_for("dashboard"))
+                else:
+                    # User is already signed in, just verify the email
+                    flash("Email verified successfully!", "success")
+                    # Redirect based on where they came from
+                    if request.referrer and 'user-details' in request.referrer:
+                        return redirect(url_for("user_details"))
+                    return redirect(url_for("dashboard"))
 
         is_authed = current_user.is_authenticated and not getattr(current_user, "is_guest", False)
         return render_template("verification.html", form=form, email=email, is_authed=is_authed)
@@ -269,6 +306,32 @@ def create_app():
     @app.route("/resend-verification", methods=["POST"])
     def resend_verification():
         email = session.get('pending_verification_email')
+        pending_email_change = session.get('pending_email_change')
+
+        if pending_email_change:
+            # This is an email change - get user by user_id
+            user = User.query.get(pending_email_change['user_id'])
+            if not user:
+                flash("Invalid verification request.", "danger")
+                session.pop('pending_email_change', None)
+                session.pop('pending_verification_email', None)
+                return redirect(url_for("signup"))
+            # Generate new code
+            code = user.generate_verification_code()
+            db.session.commit()
+
+            # Send to new email
+            from email_utils import send_verification_email
+            temp_user = type('obj', (object,), {
+                'email': pending_email_change['new_email'],
+                'first_name': user.first_name
+            })
+            if send_verification_email(mail, temp_user, code):
+                flash("Verification code resent to your new email address.", "success")
+            else:
+                flash("Failed to resend verification email. Please try again later.", "danger")
+            return redirect(url_for("verify_account"))
+
         if not email:
             if current_user.is_authenticated and not getattr(current_user, "is_guest", False):
                 email = current_user.email
@@ -408,21 +471,34 @@ def create_app():
             current_user.last_name = form.last_name.data.strip()
             current_user.full_name = f"{form.first_name.data.strip()} {form.last_name.data.strip()}"
 
-            # If email changed, require verification
+            # If email changed, require verification before updating
             if email_changed:
-                current_user.email = new_email
-                current_user.email_verified = False
+                # Don't update email yet - store it in session for verification
                 # Generate verification code
                 code = current_user.generate_verification_code()
                 db.session.commit()
 
-                # Send verification email
-                if send_verification_email(mail, current_user, code):
+                # Create a temporary user object with new email for sending verification
+                # We'll send to the new email, but verify against current user
+                from email_utils import send_verification_email
+                temp_user = type('obj', (object,), {
+                    'email': new_email,
+                    'first_name': current_user.first_name
+                })
+
+                # Send verification email to the NEW email address
+                if send_verification_email(mail, temp_user, code):
+                    # Store pending email change in session
+                    session['pending_email_change'] = {
+                        'new_email': new_email,
+                        'user_id': current_user.id
+                    }
                     session['pending_verification_email'] = new_email
-                    flash("Email updated! Please verify your new email address. A verification code has been sent.", "warning")
+                    flash("A verification code has been sent to your new email address. Please verify to complete the email change.", "warning")
                     return redirect(url_for("verify_account"))
                 else:
-                    flash("Email updated, but failed to send verification email. Please contact support.", "warning")
+                    flash("Failed to send verification email. Please try again later.", "danger")
+                    return render_template("user_details.html", form=form)
             else:
                 current_user.email = new_email
 
