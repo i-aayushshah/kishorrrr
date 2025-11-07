@@ -63,6 +63,14 @@ def create_app():
             return redirect(url_for("verify_account"))
 
         form = SignUpForm()
+        if request.method == "POST":
+            # Check for validation errors and flash them
+            if not form.validate():
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        flash(f"{getattr(form, field).label.text}: {error}", "danger")
+                return render_template("auth_signup.html", form=form)
+
         if form.validate_on_submit():
             email = form.email.data.lower().strip()
             username = form.username.data.strip()
@@ -184,6 +192,16 @@ def create_app():
             flash("Invalid reset request.", "danger")
             session.pop('pending_reset_email', None)
             return redirect(url_for("forgot_password"))
+
+        if request.method == "POST":
+            # Check for validation errors and flash them
+            if not form.validate():
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        field_label = getattr(form, field).label.text if hasattr(getattr(form, field), 'label') else field
+                        flash(f"{field_label}: {error}", "danger")
+                form.token.data = ""
+                return render_template("reset_password.html", form=form, email=email, is_authed=is_authed)
 
         if form.validate_on_submit():
             code = form.token.data.strip()
@@ -450,10 +468,29 @@ def create_app():
             form.last_name.data = current_user.last_name
             form.email.data = current_user.email
 
+        if request.method == "POST":
+            # Check for validation errors and flash them (except for optional password fields)
+            if not form.validate():
+                for field, errors in form.errors.items():
+                    # Skip password and confirm if they're empty (optional fields)
+                    if field in ['password', 'confirm'] and not form.password.data:
+                        continue
+                    for error in errors:
+                        field_label = getattr(form, field).label.text if hasattr(getattr(form, field), 'label') else field
+                        flash(f"{field_label}: {error}", "danger")
+                # Re-populate form data
+                form.first_name.data = form.first_name.data or current_user.first_name
+                form.last_name.data = form.last_name.data or current_user.last_name
+                form.email.data = form.email.data or current_user.email
+                return render_template("user_details.html", form=form)
+
         if form.validate_on_submit():
             # Verify current password first
             if not check_password_hash(current_user.password_hash, form.current_password.data):
                 flash("Current password is incorrect.", "danger")
+                form.first_name.data = current_user.first_name
+                form.last_name.data = current_user.last_name
+                form.email.data = current_user.email
                 return render_template("user_details.html", form=form)
 
             # Check if email is being changed and if it's already taken
@@ -464,6 +501,9 @@ def create_app():
                 existing_user = User.query.filter_by(email=new_email).first()
                 if existing_user and existing_user.id != current_user.id:
                     flash("Email is already registered to another account.", "danger")
+                    form.first_name.data = current_user.first_name
+                    form.last_name.data = current_user.last_name
+                    form.email.data = current_user.email
                     return render_template("user_details.html", form=form)
 
             # Update user details
@@ -498,6 +538,9 @@ def create_app():
                     return redirect(url_for("verify_account"))
                 else:
                     flash("Failed to send verification email. Please try again later.", "danger")
+                    form.first_name.data = current_user.first_name
+                    form.last_name.data = current_user.last_name
+                    form.email.data = current_user.email
                     return render_template("user_details.html", form=form)
             else:
                 current_user.email = new_email
@@ -508,13 +551,22 @@ def create_app():
                 import re
                 if not re.match(PASSWORD_RULE.regex.pattern, form.password.data):
                     flash("Password must be 8+ chars with at least one uppercase, one lowercase, and one digit.", "danger")
+                    form.first_name.data = current_user.first_name
+                    form.last_name.data = current_user.last_name
+                    form.email.data = current_user.email
                     return render_template("user_details.html", form=form)
                 if form.password.data != form.confirm.data:
                     flash("Passwords do not match.", "danger")
+                    form.first_name.data = current_user.first_name
+                    form.last_name.data = current_user.last_name
+                    form.email.data = current_user.email
                     return render_template("user_details.html", form=form)
                 # Check if new password is same as current password
                 if check_password_hash(current_user.password_hash, form.password.data):
                     flash("New password must be different from your current password.", "danger")
+                    form.first_name.data = current_user.first_name
+                    form.last_name.data = current_user.last_name
+                    form.email.data = current_user.email
                     return render_template("user_details.html", form=form)
                 current_user.password_hash = generate_password_hash(form.password.data)
 

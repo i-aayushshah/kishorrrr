@@ -83,23 +83,35 @@
             <label class="space-y-2 text-sm">
               <span class="font-semibold text-slate-200">{{ form.first_name.label }}</span>
               <div class="relative">
-                {{ form.first_name(class="w-full rounded-2xl border border-slate-700/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 shadow-inner shadow-black/10 focus:border-brand-blue/60 focus:outline-none", id="signupFirstName", placeholder="First name") }}
+                {{ form.first_name(class="w-full rounded-2xl border border-slate-700/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 shadow-inner shadow-black/10 focus:border-brand-blue/60 focus:outline-none" + (" border-rose-500/50" if form.first_name.errors else ""), id="signupFirstName", placeholder="First name") }}
               </div>
+              {% if form.first_name.errors %}
+                <p class="text-xs font-medium text-rose-400">{{ form.first_name.errors[0] }}</p>
+              {% endif %}
             </label>
             <label class="space-y-2 text-sm">
               <span class="font-semibold text-slate-200">{{ form.last_name.label }}</span>
               <div class="relative">
-                {{ form.last_name(class="w-full rounded-2xl border border-slate-700/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 shadow-inner shadow-black/10 focus:border-brand-blue/60 focus:outline-none", id="signupLastName", placeholder="Last name") }}
+                {{ form.last_name(class="w-full rounded-2xl border border-slate-700/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 placeholder-slate-500 shadow-inner shadow-black/10 focus:border-brand-blue/60 focus:outline-none" + (" border-rose-500/50" if form.last_name.errors else ""), id="signupLastName", placeholder="Last name") }}
               </div>
+              {% if form.last_name.errors %}
+                <p class="text-xs font-medium text-rose-400">{{ form.last_name.errors[0] }}</p>
+              {% endif %}
             </label>
           </div>
           <label class="space-y-2 text-sm">
             <span class="font-semibold text-slate-200">{{ form.username.label }}</span>
-            {{ form.username(class="w-full rounded-2xl border border-slate-700/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 shadow-inner shadow-black/10 focus:border-brand-blue/60 focus:outline-none", placeholder="@unmasker") }}
+            {{ form.username(class="w-full rounded-2xl border border-slate-700/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 shadow-inner shadow-black/10 focus:border-brand-blue/60 focus:outline-none" + (" border-rose-500/50" if form.username.errors else ""), placeholder="@unmasker") }}
+            {% if form.username.errors %}
+              <p class="text-xs font-medium text-rose-400">{{ form.username.errors[0] }}</p>
+            {% endif %}
           </label>
           <label class="space-y-2 text-sm">
             <span class="font-semibold text-slate-200">{{ form.email.label }}</span>
-            {{ form.email(class="w-full rounded-2xl border border-slate-700/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 shadow-inner shadow-black/10 focus:border-brand-blue/60 focus:outline-none", placeholder="name@company.com") }}
+            {{ form.email(class="w-full rounded-2xl border border-slate-700/70 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 shadow-inner shadow-black/10 focus:border-brand-blue/60 focus:outline-none" + (" border-rose-500/50" if form.email.errors else ""), placeholder="name@company.com") }}
+            {% if form.email.errors %}
+              <p class="text-xs font-medium text-rose-400">{{ form.email.errors[0] }}</p>
+            {% endif %}
           </label>
           <div class="space-y-5">
             <label class="space-y-2 text-sm">

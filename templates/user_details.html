@@ -73,9 +73,6 @@
                 </svg>
               </button>
             </div>
-            {% if form.current_password.errors %}
-              <p class="text-xs text-rose-400">{{ form.current_password.errors[0] }}</p>
-            {% endif %}
           </label>
         </div>
 
@@ -136,9 +133,6 @@
                   </svg>
                 </button>
               </div>
-              {% if form.password.errors %}
-                <p class="text-xs text-rose-400">{{ form.password.errors[0] }}</p>
-              {% endif %}
               <span class="block text-xs text-slate-500">Minimum 8 characters with upper, lower, and number.</span>
             </label>
             <label class="block space-y-2 text-sm">
@@ -158,9 +152,6 @@
                   </svg>
                 </button>
               </div>
-              {% if form.confirm.errors %}
-                <p class="text-xs text-rose-400">{{ form.confirm.errors[0] }}</p>
-              {% endif %}
             </label>
           </div>
         </div>
