@@ -61,6 +61,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Auto-dismiss flash notifications after 5 seconds
+  document.querySelectorAll('[data-flash]').forEach(flash => {
+    setTimeout(() => {
+      flash.classList.add('opacity-0', 'translate-y-[-8px]');
+      setTimeout(() => flash.remove(), 200);
+    }, 5000);
+  });
+
   /**
    * Upload preview + submit affordance
    */

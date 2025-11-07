@@ -48,3 +48,13 @@ class UploadForm(FlaskForm):
         validators=[FileRequired(), FileAllowed(["png", "jpg", "jpeg"], "Images only!")]
     )
     submit = SubmitField("Analyze")
+
+
+class UserDetailsForm(FlaskForm):
+    current_password = PasswordField("Current password", validators=[DataRequired()])
+    first_name = StringField("First name", validators=[DataRequired(), Length(min=2, max=80)])
+    last_name = StringField("Last name", validators=[DataRequired(), Length(min=2, max=80)])
+    email = StringField("Email", validators=[DataRequired(), Email(), Length(max=255)])
+    password = PasswordField("New password (leave blank to keep current)", validators=[])
+    confirm = PasswordField("Confirm new password", validators=[])
+    submit = SubmitField("Update profile")

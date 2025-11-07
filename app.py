@@ -10,7 +10,7 @@ from flask_login import LoginManager, login_user, logout_user, current_user, Ano
 from flask_mail import Mail
 
 from models import db, User, Upload
-from forms import SignInForm, SignUpForm, UploadForm, ForgotPasswordForm, VerificationForm, ResetPasswordForm
+from forms import SignInForm, SignUpForm, UploadForm, ForgotPasswordForm, VerificationForm, ResetPasswordForm, UserDetailsForm
 from config import Config
 from detect import detect_image
 from email_utils import send_verification_email, send_password_reset_email
@@ -126,35 +126,54 @@ def create_app():
     @app.route("/forgot-password", methods=["GET", "POST"])
     def forgot_password():
         form = ForgotPasswordForm()
+
+        # If user is already signed in, pre-fill their email and lock it
+        is_authed = current_user.is_authenticated and not getattr(current_user, "is_guest", False)
+        if request.method == "GET" and is_authed:
+            form.email.data = current_user.email
+
         if form.validate_on_submit():
             email = form.email.data.lower().strip()
-            user = User.query.filter_by(email=email).first()
 
-            # Always show the same message for security (don't reveal if email exists)
-            if user:
-                # Generate reset code (6-digit code like verification)
-                import random
-                from datetime import datetime, timedelta
-                reset_code = f"{random.randint(100000, 999999)}"
-                user.verification_code = reset_code
-                user.verification_code_expires = datetime.utcnow() + timedelta(minutes=15)
-                db.session.commit()
-
-                if send_password_reset_email(mail, user, reset_code):
-                    session['pending_reset_email'] = email
-                    flash("Password reset code sent to your email. Please check your inbox.", "success")
-                    return redirect(url_for("reset_password"))
-                else:
-                    flash("Failed to send reset email. Please try again later.", "danger")
+            # If user is signed in, only allow reset for their registered email
+            if is_authed:
+                if email != current_user.email:
+                    flash("You can only request a password reset for your registered email address.", "danger")
+                    return render_template("forgot_password.html", form=form, is_authed=is_authed)
+                user = current_user
             else:
-                flash("If an account exists, you'll receive reset instructions shortly.", "info")
+                user = User.query.filter_by(email=email).first()
+                # Always show the same message for security (don't reveal if email exists)
+                if not user:
+                    flash("If an account exists, you'll receive reset instructions shortly.", "info")
+                    return redirect(url_for("signin"))
+
+            # Generate reset code (6-digit code like verification)
+            import random
+            from datetime import datetime, timedelta
+            reset_code = f"{random.randint(100000, 999999)}"
+            user.verification_code = reset_code
+            user.verification_code_expires = datetime.utcnow() + timedelta(minutes=15)
+            db.session.commit()
+
+            if send_password_reset_email(mail, user, reset_code):
+                session['pending_reset_email'] = email
+                flash("Password reset code sent to your email. Please check your inbox.", "success")
+                return redirect(url_for("reset_password"))
+            else:
+                flash("Failed to send reset email. Please try again later.", "danger")
+
+            # If user was signed in, redirect back to user details, otherwise to signin
+            if is_authed:
+                return redirect(url_for("reset_password"))
             return redirect(url_for("signin"))
-        return render_template("forgot_password.html", form=form)
+        return render_template("forgot_password.html", form=form, is_authed=is_authed)
 
     @app.route("/reset-password", methods=["GET", "POST"])
     def reset_password():
         form = ResetPasswordForm()
         email = session.get('pending_reset_email')
+        is_authed = current_user.is_authenticated and not getattr(current_user, "is_guest", False)
 
         if not email:
             flash("Please request a password reset first.", "warning")
@@ -172,7 +191,7 @@ def create_app():
             if not user.is_verification_code_valid(code):
                 flash("Invalid or expired reset code. Please request a new one.", "danger")
                 form.token.data = ""
-                return render_template("reset_password.html", form=form, email=email)
+                return render_template("reset_password.html", form=form, email=email, is_authed=is_authed)
 
             # Update password
             user.password_hash = generate_password_hash(form.password.data)
@@ -181,11 +200,17 @@ def create_app():
             db.session.commit()
 
             session.pop('pending_reset_email', None)
-            flash("Password reset successfully! You can now sign in.", "success")
-            return redirect(url_for("signin"))
+
+            # Check if user is already signed in
+            if is_authed and current_user.id == user.id:
+                flash("Password reset successfully!", "success")
+                return redirect(url_for("user_details"))
+            else:
+                flash("Password reset successfully! You can now sign in.", "success")
+                return redirect(url_for("signin"))
 
         form.token.data = ""  # Don't pre-fill token
-        return render_template("reset_password.html", form=form, email=email)
+        return render_template("reset_password.html", form=form, email=email, is_authed=is_authed)
 
     @app.route("/verify", methods=["GET", "POST"])
     def verify_account():
@@ -224,16 +249,22 @@ def create_app():
             db.session.commit()
 
             session.pop('pending_verification_email', None)
-            flash("Email verified successfully! You can now sign in.", "success")
 
             # Auto-login if not already logged in
             if not current_user.is_authenticated or getattr(current_user, "is_guest", False):
                 login_user(user)
+                flash("Email verified successfully! You can now sign in.", "success")
                 return redirect(url_for("dashboard"))
             else:
+                # User is already signed in, just verify the email
+                flash("Email verified successfully!", "success")
+                # Redirect based on where they came from
+                if request.referrer and 'user-details' in request.referrer:
+                    return redirect(url_for("user_details"))
                 return redirect(url_for("dashboard"))
 
-        return render_template("verification.html", form=form, email=email)
+        is_authed = current_user.is_authenticated and not getattr(current_user, "is_guest", False)
+        return render_template("verification.html", form=form, email=email, is_authed=is_authed)
 
     @app.route("/resend-verification", methods=["POST"])
     def resend_verification():
@@ -255,6 +286,30 @@ def create_app():
                 flash("Failed to resend verification email.", "danger")
 
         return redirect(url_for("verify_account"))
+
+    @app.route("/request-password-reset", methods=["POST"])
+    def request_password_reset():
+        """Request password reset code from user details page"""
+        if not current_user.is_authenticated or getattr(current_user, "is_guest", False):
+            flash("Please sign in to request a password reset.", "warning")
+            return redirect(url_for("signin"))
+
+        user = current_user
+        # Generate reset code (6-digit code like verification)
+        import random
+        from datetime import datetime, timedelta
+        reset_code = f"{random.randint(100000, 999999)}"
+        user.verification_code = reset_code
+        user.verification_code_expires = datetime.utcnow() + timedelta(minutes=15)
+        db.session.commit()
+
+        if send_password_reset_email(mail, user, reset_code):
+            session['pending_reset_email'] = user.email
+            flash(f"Password reset code sent to {user.email}. Please check your inbox.", "success")
+            return redirect(url_for("reset_password"))
+        else:
+            flash("Failed to send password reset email. Please try again later.", "danger")
+            return redirect(url_for("user_details"))
 
     @app.route("/guest")
     def guest():
@@ -318,6 +373,80 @@ def create_app():
                 else []
             )
         return render_template("history.html", items=items)
+
+    @app.route("/user-details", methods=["GET", "POST"])
+    def user_details():
+        if not current_user.is_authenticated or getattr(current_user, "is_guest", False):
+            flash("Please sign in to access your account details.", "warning")
+            return redirect(url_for("signin"))
+
+        form = UserDetailsForm()
+
+        if request.method == "GET":
+            form.first_name.data = current_user.first_name
+            form.last_name.data = current_user.last_name
+            form.email.data = current_user.email
+
+        if form.validate_on_submit():
+            # Verify current password first
+            if not check_password_hash(current_user.password_hash, form.current_password.data):
+                flash("Current password is incorrect.", "danger")
+                return render_template("user_details.html", form=form)
+
+            # Check if email is being changed and if it's already taken
+            new_email = form.email.data.lower().strip()
+            email_changed = new_email != current_user.email
+
+            if email_changed:
+                existing_user = User.query.filter_by(email=new_email).first()
+                if existing_user and existing_user.id != current_user.id:
+                    flash("Email is already registered to another account.", "danger")
+                    return render_template("user_details.html", form=form)
+
+            # Update user details
+            current_user.first_name = form.first_name.data.strip()
+            current_user.last_name = form.last_name.data.strip()
+            current_user.full_name = f"{form.first_name.data.strip()} {form.last_name.data.strip()}"
+
+            # If email changed, require verification
+            if email_changed:
+                current_user.email = new_email
+                current_user.email_verified = False
+                # Generate verification code
+                code = current_user.generate_verification_code()
+                db.session.commit()
+
+                # Send verification email
+                if send_verification_email(mail, current_user, code):
+                    session['pending_verification_email'] = new_email
+                    flash("Email updated! Please verify your new email address. A verification code has been sent.", "warning")
+                    return redirect(url_for("verify_account"))
+                else:
+                    flash("Email updated, but failed to send verification email. Please contact support.", "warning")
+            else:
+                current_user.email = new_email
+
+            # Update password only if provided
+            if form.password.data:
+                from forms import PASSWORD_RULE
+                import re
+                if not re.match(PASSWORD_RULE.regex.pattern, form.password.data):
+                    flash("Password must be 8+ chars with at least one uppercase, one lowercase, and one digit.", "danger")
+                    return render_template("user_details.html", form=form)
+                if form.password.data != form.confirm.data:
+                    flash("Passwords do not match.", "danger")
+                    return render_template("user_details.html", form=form)
+                # Check if new password is same as current password
+                if check_password_hash(current_user.password_hash, form.password.data):
+                    flash("New password must be different from your current password.", "danger")
+                    return render_template("user_details.html", form=form)
+                current_user.password_hash = generate_password_hash(form.password.data)
+
+            db.session.commit()
+            flash("Profile updated successfully!", "success")
+            return redirect(url_for("user_details"))
+
+        return render_template("user_details.html", form=form)
 
     @app.route("/uploads/<path:filename>")
     def uploaded_file(filename):
