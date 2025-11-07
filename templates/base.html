@@ -64,14 +64,31 @@
 
         <div class="flex items-center gap-2">
           {% if is_authed %}
-            <a href="{{ url_for('signout') }}" class="hidden items-center gap-2 rounded-full border border-slate-700/60 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-brand-blue/60 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 sm:flex">
-              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M18 12H8.25" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 15l3-3-3-3" />
-              </svg>
-              Sign out
-            </a>
+            {% if request.endpoint == 'dashboard' or request.endpoint == 'history' %}
+              <span class="hidden items-center gap-2 rounded-full border border-slate-700/60 bg-slate-900/60 px-4 py-2 text-sm font-medium text-slate-200 sm:flex">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                </svg>
+                Hello {{ current_user.first_name }}!
+              </span>
+              <a href="{{ url_for('signout') }}" class="hidden items-center gap-2 rounded-full border border-slate-700/60 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-brand-blue/60 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 sm:flex">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M18 12H8.25" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 15l3-3-3-3" />
+                </svg>
+                Sign out
+              </a>
+            {% else %}
+              <a href="{{ url_for('signout') }}" class="hidden items-center gap-2 rounded-full border border-slate-700/60 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-brand-blue/60 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 sm:flex">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M18 12H8.25" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 15l3-3-3-3" />
+                </svg>
+                Sign out
+              </a>
+            {% endif %}
           {% else %}
             <a href="{{ url_for('signin') }}" class="hidden items-center gap-2 rounded-full border border-slate-700/60 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-brand-blue/60 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 sm:flex">
               <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
@@ -79,13 +96,13 @@
               </svg>
               Sign in
             </a>
+            <a href="{{ url_for('signup') }}" class="inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-brand-blue via-brand-indigo to-brand-violet px-5 py-2 text-sm font-semibold text-white shadow-elevated transition hover:brightness-[1.07] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Sign up free
+            </a>
           {% endif %}
-          <a href="{{ url_for('signup') }}" class="inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-brand-blue via-brand-indigo to-brand-violet px-5 py-2 text-sm font-semibold text-white shadow-elevated transition hover:brightness-[1.07] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            Sign up free
-          </a>
         </div>
       </div>
     </header>
@@ -194,17 +211,26 @@
 
       <div class="mt-auto space-y-3 text-sm text-slate-300">
         {% if is_authed %}
-          <a href="{{ url_for('signout') }}" class="flex items-center justify-center gap-2 rounded-full border border-slate-700/60 px-4 py-2 font-semibold uppercase tracking-wide transition hover:border-brand-blue/60 hover:text-white">
-            Sign out
-          </a>
+          {% if request.endpoint == 'dashboard' or request.endpoint == 'history' %}
+            <span class="flex items-center justify-center gap-2 rounded-full border border-slate-700/60 bg-slate-900/60 px-4 py-2 font-semibold uppercase tracking-wide text-slate-200">
+              Hello {{ current_user.first_name }}!
+            </span>
+            <a href="{{ url_for('signout') }}" class="flex items-center justify-center gap-2 rounded-full border border-slate-700/60 px-4 py-2 font-semibold uppercase tracking-wide transition hover:border-brand-blue/60 hover:text-white">
+              Sign out
+            </a>
+          {% else %}
+            <a href="{{ url_for('signout') }}" class="flex items-center justify-center gap-2 rounded-full border border-slate-700/60 px-4 py-2 font-semibold uppercase tracking-wide transition hover:border-brand-blue/60 hover:text-white">
+              Sign out
+            </a>
+          {% endif %}
         {% else %}
           <a href="{{ url_for('signin') }}" class="flex items-center justify-center gap-2 rounded-full border border-slate-700/60 px-4 py-2 font-semibold uppercase tracking-wide transition hover:border-brand-blue/60 hover:text-white">
             Sign in
           </a>
+          <a href="{{ url_for('signup') }}" class="flex items-center justify-center gap-2 rounded-full bg-gradient-to-br from-brand-blue via-brand-indigo to-brand-violet px-4 py-2 font-semibold uppercase tracking-wide text-white transition hover:brightness-[1.07]">
+            Sign up free
+          </a>
         {% endif %}
-        <a href="{{ url_for('signup') }}" class="flex items-center justify-center gap-2 rounded-full bg-gradient-to-br from-brand-blue via-brand-indigo to-brand-violet px-4 py-2 font-semibold uppercase tracking-wide text-white transition hover:brightness-[1.07]">
-          Sign up free
-        </a>
       </div>
     </div>
   </div>

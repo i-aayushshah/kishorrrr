@@ -1,6 +1,29 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="space-y-10">
+  {% if is_authed and not email_verified %}
+  <div class="rounded-3xl border border-amber-500/40 bg-amber-500/10 px-6 py-4 shadow-xl">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/20 text-amber-300">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+          </svg>
+        </span>
+        <div>
+          <p class="font-semibold text-amber-200">Email verification required</p>
+          <p class="text-sm text-amber-300/80">Please verify your email address to access all features.</p>
+        </div>
+      </div>
+      <a href="{{ url_for('verify_account') }}" class="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/20 px-4 py-2 text-sm font-semibold text-amber-200 transition hover:bg-amber-500/30">
+        Verify email
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7" />
+        </svg>
+      </a>
+    </div>
+  </div>
+  {% endif %}
   <section class="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-brand-blue/90 via-brand-indigo/80 to-brand-violet/90 px-6 py-10 text-white shadow-elevated sm:px-10">
     <div class="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-white/10 blur-3xl"></div>
     <div class="absolute -bottom-32 left-10 h-72 w-72 rounded-full bg-white/5 blur-3xl"></div>
@@ -16,13 +39,27 @@
           Unmask.AI blends forensic vision models with explainable metrics so you can trust every result. Upload an image and receive a verdict with confidence scoring you can act on instantly.
         </p>
         <div class="flex flex-wrap items-center gap-3 text-sm font-semibold">
-          <a href="{{ url_for('signup') }}" class="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-slate-900 shadow-lg shadow-black/20 transition hover:bg-slate-100">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            Create account
-          </a>
-          {% if not is_authed %}
+          {% if is_authed and email_verified %}
+            <span class="inline-flex items-center gap-2 rounded-full bg-white/20 px-5 py-2 text-white">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Verified account
+            </span>
+          {% elif is_authed %}
+            <a href="{{ url_for('verify_account') }}" class="inline-flex items-center gap-2 rounded-full border border-white/40 px-5 py-2 text-white transition hover:border-white/60 hover:bg-white/10">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Verify email
+            </a>
+          {% else %}
+            <a href="{{ url_for('signup') }}" class="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-slate-900 shadow-lg shadow-black/20 transition hover:bg-slate-100">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Create account
+            </a>
             <a href="{{ url_for('guest') }}" class="inline-flex items-center gap-2 rounded-full border border-white/40 px-5 py-2 text-white transition hover:border-white/60 hover:bg-white/10">
               <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9 9-5-5" />
@@ -72,6 +109,9 @@
 
       <p class="mt-4 text-sm text-slate-300">
         Drop a file or browse your library. We currently support JPG, JPEG, and PNG formats up to 10MB.
+        {% if is_authed and not email_verified %}
+        <span class="block mt-2 text-xs text-amber-300/80">⚠️ Verify your email to save analysis history permanently.</span>
+        {% endif %}
       </p>
 
       <form method="post" enctype="multipart/form-data" id="analyzeForm" class="mt-6 space-y-6" novalidate>

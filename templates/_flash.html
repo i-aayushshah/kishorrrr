@@ -1,6 +1,6 @@
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
-    <div class="pointer-events-none fixed top-5 right-6 z-50 flex w-full max-w-sm flex-col gap-3">
+    <div class="pointer-events-none fixed top-6 right-6 z-[200] flex w-full max-w-sm flex-col gap-3">
       {% for category, message in messages %}
         {% set base_classes = 'pointer-events-auto rounded-2xl border px-5 py-4 text-sm shadow-xl backdrop-blur-sm transition' %}
         {% if category in ['success', 'ok'] %}

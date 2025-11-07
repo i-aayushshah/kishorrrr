@@ -35,6 +35,13 @@ class VerificationForm(FlaskForm):
     submit = SubmitField("Verify account")
 
 
+class ResetPasswordForm(FlaskForm):
+    token = StringField("Token", validators=[DataRequired()])
+    password = PasswordField("New password", validators=[DataRequired(), PASSWORD_RULE])
+    confirm = PasswordField("Confirm password", validators=[DataRequired(), EqualTo("password")])
+    submit = SubmitField("Reset password")
+
+
 class UploadForm(FlaskForm):
     image = FileField(
         "Upload face image",
