@@ -1,7 +1,7 @@
 import os
 
 class Config:
-    SECRET_KEY = os.getenv("SECRET_KEY", "change-me-in-.env")
+    SECRET_KEY = os.getenv("SECRET_KEY", "6gULgge2Au9sCLhlwrEUh0iFWdCt21u5")
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///unmask_ai.db")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "uploads")
