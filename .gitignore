@@ -1,4 +1,12 @@
 env/
 __pycache__/
 uploads/
-models/
+# Model files - too large for Git
+models/*.keras
+models/*.h5
+models/*.pkl
+models/*.pth
+models/*.pt
+# Keep model_info.json and other small config files
+!models/model_info.json
+!models/*.json
