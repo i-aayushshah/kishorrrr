@@ -236,4 +236,41 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+
+  /**
+   * Scroll to uploader when "Try as guest" is clicked
+   */
+  const tryAsGuestBtn = document.getElementById('tryAsGuestBtn');
+  const uploaderSection = document.getElementById('uploaderSection');
+
+  if (tryAsGuestBtn && uploaderSection) {
+    tryAsGuestBtn.addEventListener('click', (e) => {
+      // Check if we're already on the dashboard page
+      const isDashboard = window.location.pathname === '/' || window.location.pathname.includes('dashboard');
+
+      if (isDashboard) {
+        e.preventDefault();
+        uploaderSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Add a slight offset for navbar
+        setTimeout(() => {
+          window.scrollBy(0, -80);
+        }, 100);
+      }
+      // If not on dashboard, let the link work normally (redirect to dashboard)
+    });
+  }
+
+  // Check if we need to scroll to uploader on page load (e.g., from guest route)
+  if (window.location.hash === '#uploader' || sessionStorage.getItem('scrollToUploader') === 'true') {
+    sessionStorage.removeItem('scrollToUploader');
+    setTimeout(() => {
+      const uploader = document.getElementById('uploaderSection');
+      if (uploader) {
+        uploader.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setTimeout(() => {
+          window.scrollBy(0, -80);
+        }, 100);
+      }
+    }, 300);
+  }
 });

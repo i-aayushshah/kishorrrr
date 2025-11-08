@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="space-y-10">
+<div class="space-y-8 sm:space-y-10 w-full overflow-x-hidden">
   {% if is_authed and not email_verified %}
   <div class="rounded-3xl border border-amber-500/40 bg-amber-500/10 px-6 py-4 shadow-xl">
     <div class="flex flex-wrap items-center justify-between gap-4">
@@ -24,81 +24,186 @@
     </div>
   </div>
   {% endif %}
-  <section class="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-brand-blue/90 via-brand-indigo/80 to-brand-violet/90 px-6 py-10 text-white shadow-elevated sm:px-10">
+
+  {% if not is_authed and guest_limit_reached %}
+  <div class="rounded-3xl border border-rose-500/40 bg-gradient-to-br from-rose-500/10 via-rose-600/5 to-rose-500/10 px-6 py-6 shadow-xl">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <span class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-500/20 text-rose-300">
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+          </svg>
+        </span>
+        <div>
+          <h3 class="text-lg font-semibold text-rose-200">Guest Limit Reached</h3>
+          <p class="text-sm text-rose-300/80">You've used all 2 free guest analyses. Sign up for unlimited access to our advanced deepfake detection model.</p>
+        </div>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <a href="{{ url_for('signup') }}" class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-brand-blue via-brand-indigo to-brand-violet px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-blue/30 transition hover:brightness-[1.08]">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          Sign up free
+        </a>
+        <a href="{{ url_for('signin') }}" class="inline-flex items-center gap-2 rounded-full border border-rose-500/40 bg-rose-500/20 px-5 py-3 text-sm font-semibold text-rose-200 transition hover:bg-rose-500/30">
+          Sign in
+        </a>
+      </div>
+    </div>
+  </div>
+  {% elif not is_authed and guest_remaining is not none %}
+  <div class="rounded-3xl border border-blue-500/40 bg-gradient-to-br from-blue-500/10 via-blue-600/5 to-blue-500/10 px-6 py-4 shadow-xl">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/20 text-blue-300">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+          </svg>
+        </span>
+        <div>
+          <p class="font-semibold text-blue-200">Guest Mode</p>
+          <p class="text-sm text-blue-300/80">
+            {% if guest_remaining > 0 %}
+              You have <strong>{{ guest_remaining }}</strong> free analysis{{ 'es' if guest_remaining > 1 else '' }} remaining. Sign up for unlimited access!
+            {% else %}
+              You've used all free analyses. Sign up for unlimited access!
+            {% endif %}
+          </p>
+        </div>
+      </div>
+      <a href="{{ url_for('signup') }}" class="inline-flex items-center gap-2 rounded-full border border-blue-500/40 bg-blue-500/20 px-4 py-2 text-sm font-semibold text-blue-200 transition hover:bg-blue-500/30">
+        Sign up free
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7" />
+        </svg>
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
+  <section class="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-brand-blue/90 via-brand-indigo/80 to-brand-violet/90 px-4 py-10 text-white shadow-elevated sm:px-6 sm:py-12 lg:px-10 lg:py-16">
     <div class="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-white/10 blur-3xl"></div>
     <div class="absolute -bottom-32 left-10 h-72 w-72 rounded-full bg-white/5 blur-3xl"></div>
-    <div class="relative z-10 flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
-      <div class="max-w-xl space-y-6">
-        <span class="inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white/90">
-          Real-time deepfake intelligence
-        </span>
-        <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
-          Expose synthetic content in seconds.
-        </h1>
-        <p class="text-base text-white/80">
-          Unmask.AI blends forensic vision models with explainable metrics so you can trust every result. Upload an image and receive a verdict with confidence scoring you can act on instantly.
-        </p>
-        <div class="flex flex-wrap items-center gap-3 text-sm font-semibold">
-          {% if is_authed and email_verified %}
-            <span class="inline-flex items-center gap-2 rounded-full bg-white/20 px-5 py-2 text-white">
-              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    <div class="relative z-10">
+      <div class="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between lg:gap-10">
+        <div class="flex-1 space-y-6 min-w-0">
+          <span class="inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white/90 backdrop-blur-sm">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+            </svg>
+            AI-Powered Deepfake Detection
+          </span>
+          <h1 class="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl xl:text-6xl break-words">
+            Expose synthetic content in seconds.
+          </h1>
+          <p class="text-base sm:text-lg text-white/90 leading-relaxed break-words">
+            Unmask.AI uses advanced deep learning models trained on <strong>28,020+ images</strong> to detect deepfakes with <strong>{{ "%.1f"|format(model_info.test_accuracy) if model_info else "94.1" }}% accuracy</strong>. Upload an image and receive instant authenticity verification with confidence scoring.
+          </p>
+          <div class="flex flex-wrap items-center gap-3 text-sm font-semibold">
+            {% if is_authed and email_verified %}
+              <span class="inline-flex items-center gap-2 rounded-full bg-white/20 px-5 py-2.5 text-white backdrop-blur-sm">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Verified account
+              </span>
+            {% elif is_authed %}
+              <a href="{{ url_for('verify_account') }}" class="inline-flex items-center gap-2 rounded-full border border-white/40 px-5 py-2.5 text-white transition hover:border-white/60 hover:bg-white/10 backdrop-blur-sm">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Verify email
+              </a>
+            {% else %}
+              <a href="{{ url_for('signup') }}" class="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-slate-900 shadow-lg shadow-black/20 transition hover:bg-slate-100 font-bold">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                Create account
+              </a>
+              <a href="{{ url_for('guest') }}" id="tryAsGuestBtn" class="inline-flex items-center gap-2 rounded-full border border-white/40 px-5 py-3 text-white transition hover:border-white/60 hover:bg-white/10 backdrop-blur-sm">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9 9-5-5" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l5 5L21 4.5" />
+                </svg>
+                Try as guest
+              </a>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="grid w-full gap-4 sm:grid-cols-3 lg:w-64 lg:grid-cols-1 shrink-0">
+          <div class="group rounded-2xl border border-white/20 bg-white/10 p-5 sm:p-6 shadow-lg backdrop-blur transition hover:bg-white/15 hover:scale-105">
+            <div class="flex items-center justify-between mb-3">
+              <p class="text-xs uppercase tracking-wide text-white/70 font-semibold">Model Accuracy</p>
+              <svg class="h-5 w-5 text-white/60 group-hover:text-white transition" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
               </svg>
-              Verified account
-            </span>
-          {% elif is_authed %}
-            <a href="{{ url_for('verify_account') }}" class="inline-flex items-center gap-2 rounded-full border border-white/40 px-5 py-2 text-white transition hover:border-white/60 hover:bg-white/10">
-              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </div>
+            <p class="text-3xl font-bold text-white mb-1">{{ "%.2f"|format(model_info.test_accuracy) if model_info else "94.08" }}%</p>
+            <p class="text-xs text-white/70">Test accuracy on 4,005 images</p>
+          </div>
+          <div class="group rounded-2xl border border-white/20 bg-white/10 p-6 shadow-lg backdrop-blur transition hover:bg-white/15 hover:scale-105">
+            <div class="flex items-center justify-between mb-3">
+              <p class="text-xs uppercase tracking-wide text-white/70 font-semibold">Training Data</p>
+              <svg class="h-5 w-5 text-white/60 group-hover:text-white transition" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
               </svg>
-              Verify email
-            </a>
-          {% else %}
-            <a href="{{ url_for('signup') }}" class="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-slate-900 shadow-lg shadow-black/20 transition hover:bg-slate-100">
-              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </div>
+            <p class="text-3xl font-bold text-white mb-1">28K+</p>
+            <p class="text-xs text-white/70">Training images across 2 classes</p>
+          </div>
+          <div class="group rounded-2xl border border-white/20 bg-white/10 p-6 shadow-lg backdrop-blur transition hover:bg-white/15 hover:scale-105">
+            <div class="flex items-center justify-between mb-3">
+              <p class="text-xs uppercase tracking-wide text-white/70 font-semibold">Avg. Response</p>
+              <svg class="h-5 w-5 text-white/60 group-hover:text-white transition" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Create account
-            </a>
-            <a href="{{ url_for('guest') }}" class="inline-flex items-center gap-2 rounded-full border border-white/40 px-5 py-2 text-white transition hover:border-white/60 hover:bg-white/10">
-              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9 9-5-5" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l5 5L21 4.5" />
-              </svg>
-              Try as guest
-            </a>
-          {% endif %}
+            </div>
+            <p class="text-3xl font-bold text-white mb-1">&lt;2s</p>
+            <p class="text-xs text-white/70">Instant analysis & results</p>
+          </div>
         </div>
       </div>
 
-      <div class="grid w-full gap-4 sm:grid-cols-3 lg:w-auto lg:grid-cols-1">
-        <div class="rounded-2xl border border-white/20 bg-white/10 p-5 shadow-lg backdrop-blur">
-          <p class="text-xs uppercase tracking-wide text-white/70">Average verdict time</p>
-          <p class="mt-3 text-3xl font-semibold">1.7s</p>
-          <p class="mt-1 text-xs text-white/70">Measured over 10k public images this week.</p>
-        </div>
-        <div class="rounded-2xl border border-white/20 bg-white/10 p-5 shadow-lg backdrop-blur">
-          <p class="text-xs uppercase tracking-wide text-white/70">Detection accuracy</p>
-          <p class="mt-3 text-3xl font-semibold">98.4%</p>
-          <p class="mt-1 text-xs text-white/70">Cross-validated on the FaceForensics benchmark.</p>
-        </div>
-        <div class="rounded-2xl border border-white/20 bg-white/10 p-5 shadow-lg backdrop-blur">
-          <p class="text-xs uppercase tracking-wide text-white/70">Investigations this month</p>
-          <p class="mt-3 text-3xl font-semibold">24.6k</p>
-          <p class="mt-1 text-xs text-white/70">Trusted by analysts, journalists, and creators.</p>
+      {% if model_info %}
+      <div class="mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-white/20">
+        <div class="grid gap-4 sm:gap-6 grid-cols-2 lg:grid-cols-4">
+          <div class="rounded-xl bg-white/5 p-3 sm:p-4 backdrop-blur-sm border border-white/10 min-w-0">
+            <p class="text-xs uppercase tracking-wide text-white/60 mb-2 font-semibold">Model Parameters</p>
+            <p class="text-2xl font-bold text-white">{{ "{:,}".format(model_info.total_parameters) }}</p>
+            <p class="text-xs text-white/70 mt-1">Deep CNN architecture</p>
+          </div>
+          <div class="rounded-xl bg-white/5 p-3 sm:p-4 backdrop-blur-sm border border-white/10 min-w-0">
+            <p class="text-xs uppercase tracking-wide text-white/60 mb-2 font-semibold">Epochs Trained</p>
+            <p class="text-xl sm:text-2xl font-bold text-white">{{ model_info.epochs_trained }}</p>
+            <p class="text-xs text-white/70 mt-1">Optimized training cycles</p>
+          </div>
+          <div class="rounded-xl bg-white/5 p-3 sm:p-4 backdrop-blur-sm border border-white/10 min-w-0">
+            <p class="text-xs uppercase tracking-wide text-white/60 mb-2 font-semibold">Input Resolution</p>
+            <p class="text-xl sm:text-2xl font-bold text-white break-all">{{ model_info.image_size[0] }}×{{ model_info.image_size[1] }}</p>
+            <p class="text-xs text-white/70 mt-1">High-quality analysis</p>
+          </div>
+          <div class="rounded-xl bg-white/5 p-3 sm:p-4 backdrop-blur-sm border border-white/10 min-w-0">
+            <p class="text-xs uppercase tracking-wide text-white/60 mb-2 font-semibold">Framework</p>
+            <p class="text-xl sm:text-2xl font-bold text-white break-words">TF {{ model_info.tensorflow_version.split('.')[0] }}.{{ model_info.tensorflow_version.split('.')[1] }}</p>
+            <p class="text-xs text-white/70 mt-1">TensorFlow powered</p>
+          </div>
         </div>
       </div>
+      {% endif %}
     </div>
   </section>
 
-  <section class="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-    <div class="rounded-3xl border border-slate-800/60 bg-slate-900/80 p-6 shadow-2xl shadow-black/40 backdrop-blur-sm sm:p-8">
-      <div class="flex items-center justify-between gap-4">
+  <section class="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]" id="uploaderSection">
+    <div class="rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-900/90 via-slate-900/80 to-slate-900/90 p-4 sm:p-6 lg:p-8 shadow-2xl shadow-black/40 backdrop-blur-sm min-w-0">
+      <div class="flex items-center justify-between gap-4 mb-6">
         <div>
-          <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Upload</p>
-          <h2 class="mt-2 text-2xl font-semibold text-white sm:text-3xl">Upload &amp; analyze instantly</h2>
+          <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Upload & Analyze</p>
+          <h2 class="mt-2 text-2xl font-semibold text-white sm:text-3xl">Instant Detection</h2>
         </div>
-        <span class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-blue via-brand-indigo to-brand-violet text-white">
+        <span class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-blue via-brand-indigo to-brand-violet text-white shadow-lg">
           <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5V19a2 2 0 002 2h14a2 2 0 002-2v-2.5" />
             <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 11.25L12 6.75l4.5 4.5" />
@@ -107,14 +212,33 @@
         </span>
       </div>
 
-      <p class="mt-4 text-sm text-slate-300">
-        Drop a file or browse your library. We currently support JPG, JPEG, and PNG formats up to 10MB.
+      <p class="text-sm text-slate-300 mb-6">
+        Upload an image to analyze with our advanced deepfake detection model. Supports JPG, JPEG, and PNG formats up to 10MB.
         {% if is_authed and not email_verified %}
         <span class="block mt-2 text-xs text-amber-300/80">⚠️ Verify your email to save analysis history permanently.</span>
+        {% elif not is_authed %}
+        <span class="block mt-2 text-xs text-blue-300/80">💡 Sign up for unlimited analyses and full history access.</span>
         {% endif %}
       </p>
 
-      <form method="post" enctype="multipart/form-data" id="analyzeForm" class="mt-6 space-y-6" novalidate>
+      {% if guest_limit_reached %}
+      <div class="rounded-2xl border border-rose-500/40 bg-rose-500/10 p-6 text-center mb-6">
+        <svg class="h-12 w-12 mx-auto mb-3 text-rose-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+        </svg>
+        <h3 class="text-lg font-semibold text-rose-200 mb-2">Limit Reached</h3>
+        <p class="text-sm text-rose-300/80 mb-4">You've used all free guest analyses. Sign up for unlimited access!</p>
+        <div class="flex flex-wrap items-center justify-center gap-3">
+          <a href="{{ url_for('signup') }}" class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-brand-blue via-brand-indigo to-brand-violet px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-blue/30 transition hover:brightness-[1.08]">
+            Sign up free
+          </a>
+          <a href="{{ url_for('signin') }}" class="inline-flex items-center gap-2 rounded-full border border-rose-500/40 px-5 py-2.5 text-sm font-semibold text-rose-200 transition hover:bg-rose-500/20">
+            Sign in
+          </a>
+        </div>
+      </div>
+      {% else %}
+      <form method="post" enctype="multipart/form-data" id="analyzeForm" class="space-y-6" novalidate>
         {{ form.hidden_tag() }}
 
         <div class="space-y-4">
@@ -124,23 +248,23 @@
             </label>
           </div>
 
-          <label for="uploadInput" class="group relative flex cursor-pointer flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-slate-700/80 bg-slate-900/80 p-10 text-center transition hover:border-brand-blue/60 hover:bg-slate-900/60">
-            <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-800/80 text-brand-blue">
-              <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+          <label for="uploadInput" class="group relative flex cursor-pointer flex-col items-center justify-center gap-4 rounded-3xl border-2 border-dashed border-slate-700/80 bg-slate-900/60 p-12 text-center transition hover:border-brand-blue/60 hover:bg-slate-900/80">
+            <div class="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-blue/20 via-brand-indigo/20 to-brand-violet/20 text-brand-blue transition group-hover:scale-110">
+              <svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V8.25m0 0L9 11.25m3-3 3 3M6.75 19.5h10.5A1.5 1.5 0 0018.75 18V9.75A1.5 1.5 0 0017.25 8.25h-1.086a1.5 1.5 0 01-1.06-.44l-1.708-1.708a1.5 1.5 0 00-1.06-.439h-2.232a1.5 1.5 0 00-1.06.439L7.896 8.31a1.5 1.5 0 01-1.06.44H5.25A1.5 1.5 0 003.75 10.25V18a1.5 1.5 0 001.5 1.5z" />
               </svg>
             </div>
-            <div class="space-y-1">
+            <div class="space-y-2">
               <p class="text-base font-semibold text-white">Click to browse or drag an image here</p>
               <p class="text-xs text-slate-400">PNG, JPG, JPEG up to 10MB</p>
             </div>
-            <div class="absolute inset-0 rounded-3xl border border-brand-blue/40 opacity-0 transition group-hover:opacity-100"></div>
+            <div class="absolute inset-0 rounded-3xl border-2 border-brand-blue/40 opacity-0 transition group-hover:opacity-100 pointer-events-none"></div>
           </label>
           {{ form.image(class="hidden", id="uploadInput", accept="image/png,image/jpeg,image/jpg", **{'data-upload-input': 'true'}) }}
 
           <div class="hidden" data-preview>
             <div class="rounded-3xl border border-slate-800/60 bg-slate-900/60 p-4">
-              <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Preview</p>
+              <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400 mb-3">Preview</p>
               <div class="mt-3 overflow-hidden rounded-2xl border border-slate-800/50 bg-slate-950/60">
                 <img src="" alt="Preview" class="max-h-72 w-full object-cover" data-preview-img>
               </div>
@@ -149,9 +273,9 @@
           </div>
         </div>
 
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <p class="text-xs text-slate-400">Uploads are processed securely and deleted after analysis.</p>
-          <button id="analyzeBtn" type="submit" class="inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-brand-blue via-brand-indigo to-brand-violet px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-blue/20 transition hover:brightness-[1.08] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950">
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+          <p class="text-xs text-slate-400">Secure processing • Results in seconds</p>
+          <button id="analyzeBtn" type="submit" class="inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-brand-blue via-brand-indigo to-brand-violet px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-brand-blue/20 transition hover:brightness-[1.08] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 disabled:opacity-50 disabled:cursor-not-allowed" {% if guest_limit_reached %}disabled{% endif %}>
             <span data-label class="inline-flex items-center gap-2">
               <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5h2.25L7.5 18l3-10.5L13.5 15l2.25-7.5H21" />
@@ -166,15 +290,16 @@
           </button>
         </div>
       </form>
+      {% endif %}
     </div>
 
-    <div class="rounded-3xl border border-slate-800/60 bg-slate-900/60 p-6 shadow-2xl shadow-black/40 backdrop-blur-sm sm:p-8">
-      <div class="flex items-start justify-between gap-4">
+    <div class="rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-900/90 via-slate-900/80 to-slate-900/90 p-4 sm:p-6 lg:p-8 shadow-2xl shadow-black/40 backdrop-blur-sm min-w-0">
+      <div class="flex items-start justify-between gap-4 mb-6">
         <div>
-          <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Insights</p>
-          <h2 class="mt-2 text-2xl font-semibold text-white sm:text-3xl">Latest verdict</h2>
+          <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Results</p>
+          <h2 class="mt-2 text-2xl font-semibold text-white sm:text-3xl">Latest Verdict</h2>
         </div>
-        <span class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-800/70 text-brand-blue">
+        <span class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-800/70 text-brand-blue shadow-lg">
           <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 3.75L9 8.25H4.5l3.75 4.5-1.5 6L12 15.75l5.25 3L15.75 12.75 19.5 8.25H15l-2.25-4.5h-1.5z" />
           </svg>
@@ -182,46 +307,46 @@
       </div>
 
       {% if result %}
-        <div class="mt-6 space-y-6">
-          <div class="overflow-hidden rounded-3xl border border-slate-800/60 bg-slate-950/50">
-            <img src="{{ url_for('uploaded_file', filename=result.filename) }}" alt="Uploaded image" class="max-h-80 w-full object-cover">
+        <div class="space-y-6">
+          <div class="overflow-hidden rounded-3xl border border-slate-800/60 bg-slate-950/50 shadow-xl">
+            <img src="{{ url_for('uploaded_file', filename=result.filename) }}" alt="Uploaded image" class="w-full object-cover" style="max-height: 320px;">
           </div>
-          <div class="space-y-4">
+          <div class="space-y-5">
             <div class="flex flex-wrap items-center gap-4">
               {% if result.label == 'FAKE' %}
-                <span class="inline-flex items-center gap-2 rounded-full bg-rose-500/10 px-4 py-2 text-sm font-semibold text-rose-200">
-                  <span class="h-2 w-2 rounded-full bg-rose-400"></span>
-                  Fake detected
+                <span class="inline-flex items-center gap-2.5 rounded-full bg-rose-500/10 px-5 py-2.5 text-sm font-semibold text-rose-200 border border-rose-500/20">
+                  <span class="h-2.5 w-2.5 rounded-full bg-rose-400 animate-pulse"></span>
+                  Fake Detected
                 </span>
               {% else %}
-                <span class="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-200">
-                  <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+                <span class="inline-flex items-center gap-2.5 rounded-full bg-emerald-500/10 px-5 py-2.5 text-sm font-semibold text-emerald-200 border border-emerald-500/20">
+                  <span class="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
                   Authentic
                 </span>
               {% endif %}
-              <span class="rounded-full border border-slate-800/60 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-300">
-                Confidence score
+              <span class="rounded-full border border-slate-800/60 bg-slate-800/40 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-300">
+                Confidence Score
               </span>
             </div>
 
-            <div class="space-y-2">
-              <div class="flex items-center justify-between text-sm text-slate-300">
-                <span>{{ result.label }}</span>
-                <span>{{ result.confidence }}%</span>
+            <div class="space-y-3">
+              <div class="flex items-center justify-between text-sm">
+                <span class="font-medium text-slate-300">{{ result.label }}</span>
+                <span class="font-bold text-white text-lg">{{ result.confidence }}%</span>
               </div>
-              <div class="h-2 w-full overflow-hidden rounded-full bg-slate-800/60">
-                <div class="h-full rounded-full {{ 'bg-rose-500' if result.label == 'FAKE' else 'bg-emerald-400' }}" style="width: {{ result.confidence }}%;"></div>
+              <div class="h-3 w-full overflow-hidden rounded-full bg-slate-800/60 shadow-inner">
+                <div class="h-full rounded-full transition-all duration-500 {{ 'bg-gradient-to-r from-rose-500 to-rose-600' if result.label == 'FAKE' else 'bg-gradient-to-r from-emerald-400 to-emerald-500' }}" style="width: {{ result.confidence }}%;"></div>
               </div>
             </div>
 
-            <div class="flex flex-wrap items-center gap-3 text-xs text-slate-400">
-              <span class="inline-flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-3 text-xs text-slate-400 pt-2">
+              <span class="inline-flex items-center gap-2 rounded-lg bg-slate-800/40 px-3 py-1.5">
                 <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 6.75h15m-15 4.5h15m-15 4.5h15" />
                 </svg>
-                {{ result.filename }}
+                {{ result.filename[:30] }}{% if result.filename|length > 30 %}...{% endif %}
               </span>
-              <a href="{{ url_for('history') }}" class="inline-flex items-center gap-2 rounded-full border border-slate-700/60 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-brand-blue/60 hover:text-white">
+              <a href="{{ url_for('history') }}" class="inline-flex items-center gap-2 rounded-full border border-slate-700/60 bg-slate-800/40 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-brand-blue/60 hover:text-white hover:bg-slate-800/60">
                 View history
                 <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7" />
@@ -231,18 +356,18 @@
           </div>
         </div>
       {% else %}
-        <div class="mt-6 flex flex-col items-center justify-center gap-5 rounded-3xl border border-dashed border-slate-800/70 bg-slate-900/50 p-10 text-center">
-          <span class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-800/60 text-brand-blue">
-            <svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+        <div class="flex flex-col items-center justify-center gap-6 rounded-3xl border border-dashed border-slate-800/70 bg-slate-900/30 p-12 text-center min-h-[400px]">
+          <span class="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-800/60 to-slate-900/60 text-brand-blue shadow-lg">
+            <svg class="h-10 w-10" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l3 3" />
               <circle cx="12" cy="12" r="8.25" />
             </svg>
           </span>
-          <div class="space-y-2">
-            <h3 class="text-xl font-semibold text-white">Awaiting your first analysis</h3>
-            <p class="text-sm text-slate-300">Upload a candidate image to unlock result insights, authenticity scoring, and explainability overlays.</p>
+          <div class="space-y-2 max-w-sm">
+            <h3 class="text-xl font-semibold text-white">Awaiting Analysis</h3>
+            <p class="text-sm text-slate-300 leading-relaxed">Upload an image to receive instant deepfake detection results with confidence scoring and detailed insights.</p>
           </div>
-          <a href="#analyzeForm" class="inline-flex items-center gap-2 rounded-full border border-brand-blue/40 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-brand-blue transition hover:bg-brand-blue/10">
+          <a href="#analyzeForm" class="inline-flex items-center gap-2 rounded-full border border-brand-blue/40 bg-brand-blue/10 px-5 py-2.5 text-sm font-semibold text-brand-blue transition hover:bg-brand-blue/20">
             Go to uploader
             <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7" />

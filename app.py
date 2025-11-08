@@ -127,6 +127,9 @@ def create_app():
                 return redirect(url_for("verify_account"))
 
             login_user(user)
+            # Clear guest detection count when signing in
+            session.pop("guest_detection_count", None)
+            session.pop("guest_session_id", None)
             flash("Signed in successfully.", "success")
             return redirect(url_for("dashboard"))
         return render_template("auth_signin.html", form=form)
@@ -308,6 +311,9 @@ def create_app():
                 # Auto-login if not already logged in
                 if not current_user.is_authenticated or getattr(current_user, "is_guest", False):
                     login_user(user)
+                    # Clear guest detection count when auto-logging in after verification
+                    session.pop("guest_detection_count", None)
+                    session.pop("guest_session_id", None)
                     flash("Email verified successfully! You can now sign in.", "success")
                     return redirect(url_for("dashboard"))
                 else:
@@ -397,7 +403,8 @@ def create_app():
         if "guest_session_id" not in session:
             session["guest_session_id"] = secrets.token_hex(16)
         flash("You are browsing as Guest. Sign up to keep your history across devices.", "info")
-        return redirect(url_for("dashboard"))
+        # Redirect with hash to trigger scroll to uploader
+        return redirect(url_for("dashboard") + "#uploader")
 
     @app.route("/signout")
     def signout():
@@ -413,10 +420,25 @@ def create_app():
     def dashboard():
         form = UploadForm()
         result = None
+        is_guest = not (current_user.is_authenticated and not getattr(current_user, "is_guest", False))
+
+        # Check guest detection limit
+        if is_guest:
+            guest_detection_count = session.get("guest_detection_count", 0)
+            if guest_detection_count >= 2:
+                flash("You've reached the guest detection limit (2 analyses). Please sign up or sign in for unlimited access.", "warning")
+                return render_template("dashboard.html", form=form, result=result, guest_limit_reached=True)
 
         if form.validate_on_submit():
             file = form.image.data
             if file and allowed_file(file.filename):
+                # Check guest limit before processing
+                if is_guest:
+                    guest_detection_count = session.get("guest_detection_count", 0)
+                    if guest_detection_count >= 2:
+                        flash("You've reached the guest detection limit (2 analyses). Please sign up or sign in for unlimited access.", "warning")
+                        return render_template("dashboard.html", form=form, result=result, guest_limit_reached=True)
+
                 try:
                     # Ensure upload directory exists
                     upload_dir = Path(Config.UPLOAD_FOLDER)
@@ -448,6 +470,10 @@ def create_app():
                     else:
                         guest_id = session.get("guest_session_id") or secrets.token_hex(16)
                         session["guest_session_id"] = guest_id
+
+                        # Increment guest detection count
+                        session["guest_detection_count"] = session.get("guest_detection_count", 0) + 1
+
                         upload = Upload(
                             filename=safe_name,
                             result_label=label,
@@ -461,6 +487,14 @@ def create_app():
                     result = {"label": label, "confidence": confidence, "filename": safe_name}
                     flash(f"Analysis complete: {label} ({confidence}%)", "success")
 
+                    # Show remaining guest detections
+                    if is_guest:
+                        remaining = 2 - session.get("guest_detection_count", 0)
+                        if remaining > 0:
+                            flash(f"Guest detections remaining: {remaining}. Sign up for unlimited access!", "info")
+                        else:
+                            flash("You've reached the guest limit. Sign up for unlimited access!", "warning")
+
                 except Exception as e:
                     db.session.rollback()
                     print(f"[dashboard] Error processing upload: {e}")
@@ -468,7 +502,23 @@ def create_app():
             else:
                 flash("Unsupported file type. Please upload PNG/JPG/JPEG.", "danger")
 
-        return render_template("dashboard.html", form=form, result=result)
+        # Load model info for display
+        try:
+            import json
+            model_info_path = Path(__file__).parent / "models" / "model_info.json"
+            with open(model_info_path, 'r') as f:
+                model_info = json.load(f)
+        except Exception as e:
+            print(f"[dashboard] Error loading model info: {e}")
+            model_info = None
+
+        # Get guest detection count
+        guest_detection_count = session.get("guest_detection_count", 0) if is_guest else 0
+        guest_remaining = max(0, 2 - guest_detection_count) if is_guest else None
+
+        return render_template("dashboard.html", form=form, result=result, model_info=model_info,
+                             guest_detection_count=guest_detection_count, guest_remaining=guest_remaining,
+                             guest_limit_reached=is_guest and guest_detection_count >= 2)
 
     @app.route("/history")
     def history():
