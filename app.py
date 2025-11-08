@@ -417,24 +417,54 @@ def create_app():
         if form.validate_on_submit():
             file = form.image.data
             if file and allowed_file(file.filename):
-                safe_name = f"{secrets.token_hex(8)}_{file.filename}"
-                save_path = os.path.join(Config.UPLOAD_FOLDER, safe_name)
-                file.save(save_path)
+                try:
+                    # Ensure upload directory exists
+                    upload_dir = Path(Config.UPLOAD_FOLDER)
+                    upload_dir.mkdir(parents=True, exist_ok=True)
 
-                label, confidence = detect_image(save_path)
+                    # Generate safe filename
+                    safe_name = f"{secrets.token_hex(8)}_{file.filename}"
+                    save_path = os.path.join(Config.UPLOAD_FOLDER, safe_name)
 
-                if current_user.is_authenticated and not getattr(current_user, "is_guest", False):
-                    upload = Upload(filename=safe_name, result_label=label, confidence=confidence, user_id=current_user.id)
-                else:
-                    guest_id = session.get("guest_session_id") or secrets.token_hex(16)
-                    session["guest_session_id"] = guest_id
-                    upload = Upload(filename=safe_name, result_label=label, confidence=confidence, guest_session_id=guest_id)
+                    # Save file
+                    file.save(save_path)
 
-                db.session.add(upload)
-                db.session.commit()
+                    # Verify file was saved
+                    if not os.path.exists(save_path):
+                        flash("Failed to save uploaded image. Please try again.", "danger")
+                        return render_template("dashboard.html", form=form, result=result)
 
-                result = {"label": label, "confidence": confidence, "filename": safe_name}
-                flash(f"Result: {label} ({confidence}%)", "success")
+                    # Run detection
+                    label, confidence = detect_image(save_path)
+
+                    # Save to database
+                    if current_user.is_authenticated and not getattr(current_user, "is_guest", False):
+                        upload = Upload(
+                            filename=safe_name,
+                            result_label=label,
+                            confidence=confidence,
+                            user_id=current_user.id
+                        )
+                    else:
+                        guest_id = session.get("guest_session_id") or secrets.token_hex(16)
+                        session["guest_session_id"] = guest_id
+                        upload = Upload(
+                            filename=safe_name,
+                            result_label=label,
+                            confidence=confidence,
+                            guest_session_id=guest_id
+                        )
+
+                    db.session.add(upload)
+                    db.session.commit()
+
+                    result = {"label": label, "confidence": confidence, "filename": safe_name}
+                    flash(f"Analysis complete: {label} ({confidence}%)", "success")
+
+                except Exception as e:
+                    db.session.rollback()
+                    print(f"[dashboard] Error processing upload: {e}")
+                    flash(f"An error occurred while processing your image: {str(e)}", "danger")
             else:
                 flash("Unsupported file type. Please upload PNG/JPG/JPEG.", "danger")
 

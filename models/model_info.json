@@ -1,0 +1,21 @@
+{
+    "class_names": [
+        "fake",
+        "real"
+    ],
+    "num_classes": 2,
+    "image_size": [
+        256,
+        256
+    ],
+    "input_shape": [
+        256,
+        256,
+        3
+    ],
+    "total_parameters": 10997634,
+    "test_accuracy": 94.08,
+    "epochs_trained": 5,
+    "tensorflow_version": "2.19.0",
+    "preprocessing": "Resize to 256x256, no normalization needed (model handles it)"
+}
